@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Dashboard/Home for everyone -->
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dashboard" />
+
+    <!-- Queue - Only visible for Staff (hide programmatically in DashboardActivity) -->
+    <item
+        android:id="@+id/nav_queue"
+        android:icon="@drawable/ic_queue"
+        android:title="Queue" />
+
+    <!-- Appointments - Only for Patients, hide programmatically if role is staff -->
+    <item
+        android:id="@+id/nav_appointments"
+        android:icon="@drawable/ic_appointment"
+        android:title="Appointments" />
+
+    <!-- Vitals / Update Vitals -->
+    <item
+        android:id="@+id/nav_vitals"
+        android:icon="@drawable/ic_vitals"
+        android:title="Vitals" />
+
+    <!-- Medical History / Patient Records -->
+    <item
+        android:id="@+id/nav_history"
+        android:icon="@drawable/ic_history"
+        android:title="History" />
+
+    <!-- Profile for everyone -->
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
+
+</menu>

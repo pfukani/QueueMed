@@ -1,0 +1,43 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#000000"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vitals"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Placeholder for vitals -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No vitals recorded yet"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Staff only: update vitals button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdateVitals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Vitals"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#BB0000"
+            app:cornerRadius="25dp"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

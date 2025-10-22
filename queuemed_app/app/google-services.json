@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "514570037713",
+    "project_id": "queuemed-f1a6c",
+    "storage_bucket": "queuemed-f1a6c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514570037713:android:b6c13e0e6fc7d766a998f0",
+        "android_client_info": {
+          "package_name": "com.queuemed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR0pXhXfv26deZxTb9STYl9x0LUCu1SPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
