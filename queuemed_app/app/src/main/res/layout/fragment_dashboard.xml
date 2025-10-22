@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#000000"
     android:padding="16dp">
 
     <LinearLayout
@@ -13,91 +13,97 @@
         <!-- Welcome Message -->
         <TextView
             android:id="@+id/tvWelcome"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Welcome, User"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginBottom="16dp"/>
+            android:textColor="#B0B0B0"
+            android:layout_marginBottom="24dp" />
 
-        <!-- Summary Cards -->
+        <!-- Quick Stats -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="24dp">
 
-            <!-- Card 1 -->
             <LinearLayout
-                android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_dark"
+                android:elevation="4dp"
                 android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upcoming"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#B0B0B0" />
 
                 <TextView
                     android:id="@+id/tvUpcomingAppointments"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
+                    android:textColor="#D9D9D9"
                     android:textStyle="bold"
-                    android:textColor="#BB0000"/>
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_dark"
+                android:elevation="4dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Upcoming Appointments"
-                    android:textSize="14sp"
-                    android:textColor="#555555"/>
-            </LinearLayout>
-
-            <!-- Card 2 -->
-            <LinearLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="120dp"
-                android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/bg_card"
-                android:layout_marginStart="8dp">
+                    android:text="Checked In"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#B0B0B0" />
 
                 <TextView
                     android:id="@+id/tvCheckedIn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
+                    android:textColor="#D9D9D9"
                     android:textStyle="bold"
-                    android:textColor="#00AA00"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Checked In"
-                    android:textSize="14sp"
-                    android:textColor="#555555"/>
+                    android:layout_marginTop="4dp"/>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Additional Info -->
+        <!-- Recent Appointments Label -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Recent Appointments"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
+            android:textColor="#B0B0B0"
+            android:layout_marginBottom="8dp" />
 
+        <!-- RecyclerView for Recent Appointments -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerRecentAppointments"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical"/>
-
+            android:background="#121212"
+            android:padding="8dp"
+            android:elevation="2dp"/>
     </LinearLayout>
 </ScrollView>

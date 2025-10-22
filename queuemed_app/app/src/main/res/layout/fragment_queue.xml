@@ -1,13 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:background="#F9F9F9">
+    android:padding="16dp"
+    android:background="#000000">
 
+    <!-- Queue Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Queue"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="#FF0000"
+        android:layout_marginBottom="12dp" />
+
+    <!-- RecyclerView Container -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewQueue"
+        android:id="@+id/recyclerQueue"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#121212"
+        android:padding="8dp"
+        android:elevation="2dp" />
 </LinearLayout>

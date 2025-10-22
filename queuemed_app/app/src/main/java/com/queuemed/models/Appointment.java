@@ -11,6 +11,7 @@ public class Appointment {
     // Empty constructor required for Firebase
     public Appointment() {}
 
+    // 6-parameter constructor (for booking)
     public Appointment(String id, String patientName, String patientEmail, String date, String time, String status) {
         this.id = id;
         this.patientName = patientName;
@@ -18,6 +19,18 @@ public class Appointment {
         this.date = date;
         this.time = time;
         this.status = status;
+    }
+
+    // 9-parameter constructor (keep if needed for other features)
+    public Appointment(String id, String patientName, String patientEmail, String date, String time, String status,
+                       String something1, String something2, String something3) {
+        this.id = id;
+        this.patientName = patientName;
+        this.patientEmail = patientEmail;
+        this.date = date;
+        this.time = time;
+        this.status = status;
+        // set extra fields if needed
     }
 
     // Getters and setters

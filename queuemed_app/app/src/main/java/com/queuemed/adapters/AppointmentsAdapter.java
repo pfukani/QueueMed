@@ -6,12 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.FirebaseDatabase;
 import com.queuemed.R;
 import com.queuemed.models.Appointment;
 
@@ -20,11 +18,14 @@ import java.util.List;
 public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapter.ViewHolder> {
 
     private Context context;
-    private List<Appointment> appointmentList;
+    private List<Appointment> appointments;
+    private CheckInCallback callback;
 
-    public AppointmentsAdapter(Context context, List<Appointment> appointmentList) {
+    // Constructor with callback
+    public AppointmentsAdapter(Context context, List<Appointment> appointments, CheckInCallback callback) {
         this.context = context;
-        this.appointmentList = appointmentList;
+        this.appointments = appointments;
+        this.callback = callback;
     }
 
     @NonNull
@@ -36,47 +37,30 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Appointment appointment = appointmentList.get(position);
+        Appointment appointment = appointments.get(position);
+
         holder.tvPatientName.setText(appointment.getPatientName());
         holder.tvDate.setText("Date: " + appointment.getDate());
         holder.tvTime.setText("Time: " + appointment.getTime());
         holder.tvStatus.setText("Status: " + appointment.getStatus());
 
-        // Show or hide Check-In button
-        if ("Pending".equals(appointment.getStatus())) {
-            holder.btnCheckIn.setVisibility(View.VISIBLE);
-        } else {
-            holder.btnCheckIn.setVisibility(View.GONE);
-        }
-
         holder.btnCheckIn.setOnClickListener(v -> {
-            // Update status in Firebase
-            FirebaseDatabase.getInstance()
-                    .getReference("appointments")
-                    .child(appointment.getPatientEmail().replace(".", "_"))
-                    .child(appointment.getId())
-                    .child("status")
-                    .setValue("Checked In")
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(context, "Checked in successfully!", Toast.LENGTH_SHORT).show();
-                        appointment.setStatus("Checked In");
-                        notifyItemChanged(position);
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(context, "Check-in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            if (callback != null) {
+                callback.onCheckIn(appointment); // trigger check-in in the fragment
+            }
         });
     }
 
     @Override
     public int getItemCount() {
-        return appointmentList.size();
+        return appointments.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvPatientName, tvDate, tvTime, tvStatus;
         Button btnCheckIn;
 
-        ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPatientName = itemView.findViewById(R.id.tvPatientName);
             tvDate = itemView.findViewById(R.id.tvDate);
@@ -84,5 +68,10 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
             tvStatus = itemView.findViewById(R.id.tvStatus);
             btnCheckIn = itemView.findViewById(R.id.btnCheckIn);
         }
+    }
+
+    // Callback interface
+    public interface CheckInCallback {
+        void onCheckIn(Appointment appointment);
     }
 }

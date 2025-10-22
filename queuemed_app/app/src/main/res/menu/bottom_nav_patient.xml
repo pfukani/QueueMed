@@ -1,33 +1,47 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Dashboard/Home for everyone -->
-    <item
-        android:id="@+id/nav_dashboard"
-        android:icon="@drawable/ic_dashboard"
-        android:title="Dashboard" />
+    <group android:checkableBehavior="single">
 
-    <item
-        android:id="@+id/nav_appointments"
-        android:icon="@drawable/ic_appointment"
-        android:title="Appointments" />
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_dashboard"
+            android:title="Dashboard"
+            android:orderInCategory="1"
+            android:iconTint="@color/nav_icon_tint" />
 
-    <item
-        android:id="@+id/nav_checkin"
-        android:icon="@drawable/ic_check"
-        android:title="Check-In" />
+        <item
+            android:id="@+id/nav_appointments"
+            android:icon="@drawable/ic_appointment"
+            android:title="Appointments"
+            android:orderInCategory="2"
+            android:iconTint="@color/nav_icon_tint" />
 
-    <item
-        android:id="@+id/nav_vitals"
-        android:icon="@drawable/ic_vitals"
-        android:title="Vitals" />
+        <item
+            android:id="@+id/nav_checkin"
+            android:icon="@drawable/ic_check"
+            android:title="Check-In"
+            android:orderInCategory="3"
+            android:iconTint="@color/nav_icon_tint" />
 
-    <item
-        android:id="@+id/nav_history"
-        android:icon="@drawable/ic_history"
-        android:title="History" />
+        <item
+            android:id="@+id/nav_vitals"
+            android:icon="@drawable/ic_vitals"
+            android:title="Vitals"
+            android:orderInCategory="4"
+            android:iconTint="@color/nav_icon_tint" />
 
-    <item
-        android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_profile"
-        android:title="Profile" />
+        <item
+            android:id="@+id/nav_history"
+            android:icon="@drawable/ic_history"
+            android:title="History"
+            android:orderInCategory="5"
+            android:iconTint="@color/nav_icon_tint" />
+
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_profile"
+            android:title="Profile"
+            android:orderInCategory="6"
+            android:iconTint="@color/nav_icon_tint" />
+
+    </group>
 </menu>

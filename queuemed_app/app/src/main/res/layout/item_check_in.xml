@@ -1,45 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@drawable/bg_card"
-    android:layout_marginBottom="8dp">
+    android:padding="16dp"
+    android:background="@drawable/bg_card_dark"
+    android:layout_marginBottom="12dp"
+    android:elevation="4dp">
 
+    <!-- Patient Name -->
     <TextView
         android:id="@+id/tvPatientName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Patient Name"
         android:textStyle="bold"
-        android:textSize="16sp"/>
+        android:textSize="18sp"
+        android:textColor="#B0B0B0"
+        android:layout_marginBottom="4dp" />
 
+    <!-- Date -->
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Date"/>
+        android:text="Date"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:layout_marginBottom="2dp" />
 
+    <!-- Time -->
     <TextView
         android:id="@+id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time"/>
+        android:text="Time"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:layout_marginBottom="2dp" />
 
+    <!-- Status -->
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Status"/>
+        android:text="Status"
+        android:textColor="#888888"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Check-In Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCheckIn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Check-In"
-        android:layout_marginTop="8dp"
-        android:backgroundTint="@color/purple_500"
-        android:textColor="@android:color/white"/>
+        android:backgroundTint="#FF0000"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        app:cornerRadius="12dp"
+        android:elevation="2dp" />
 </LinearLayout>
