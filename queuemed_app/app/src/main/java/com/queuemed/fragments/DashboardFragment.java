@@ -19,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.queuemed.R;
 import com.queuemed.adapters.AppointmentsAdapter;
+import com.queuemed.adapters.AppointmentsAdapter.CheckInCallback;
 import com.queuemed.models.Appointment;
 import com.queuemed.utils.SharedPrefManager;
 
@@ -51,7 +52,15 @@ public class DashboardFragment extends Fragment {
         String userName = sp.getUserName();
         tvWelcome.setText("Welcome, " + userName);
 
-        adapter = new AppointmentsAdapter(getContext(), recentAppointments);
+        // Updated adapter with CheckInCallback
+        adapter = new AppointmentsAdapter(getContext(), recentAppointments, new CheckInCallback() {
+            @Override
+            public void onCheckIn(Appointment appointment) {
+                // Optional: Handle check-in click if needed on Dashboard
+                // For now, do nothing or show a Toast
+            }
+        });
+
         recyclerRecentAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerRecentAppointments.setAdapter(adapter);
 

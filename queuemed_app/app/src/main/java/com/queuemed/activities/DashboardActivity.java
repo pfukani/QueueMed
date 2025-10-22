@@ -2,7 +2,6 @@ package com.queuemed.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -13,6 +12,7 @@ import com.queuemed.fragments.DashboardFragment;
 import com.queuemed.fragments.MedicalHistoryFragment;
 import com.queuemed.fragments.ProfileFragment;
 import com.queuemed.fragments.QueueFragment;
+import com.queuemed.fragments.StaffDashboardFragment;
 import com.queuemed.fragments.VitalsFragment;
 import com.queuemed.fragments.CheckInFragment;
 import com.queuemed.utils.SharedPrefManager;
@@ -33,13 +33,13 @@ public class DashboardActivity extends AppCompatActivity {
 
         bottomNav = findViewById(R.id.bottomNav);
 
-        // Inflate correct menu and default fragment
+        // Inflate the proper menu
         if (role.equals("staff")) {
             bottomNav.inflateMenu(R.menu.bottom_nav_staff);
-            loadFragment(new QueueFragment()); // default fragment for staff
+            loadFragment(new StaffDashboardFragment()); // Default for staff
         } else { // patient
             bottomNav.inflateMenu(R.menu.bottom_nav_patient);
-            loadFragment(new DashboardFragment()); // default fragment for patient
+            loadFragment(new DashboardFragment()); // Default for patient
         }
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -47,6 +47,7 @@ public class DashboardActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (role.equals("staff")) {
+                // Staff menu items
                 if (id == R.id.nav_queue) {
                     fragment = new QueueFragment();
                 } else if (id == R.id.nav_update_vitals) {
@@ -60,7 +61,7 @@ public class DashboardActivity extends AppCompatActivity {
                     startActivity(new Intent(DashboardActivity.this, LoginActivity.class));
                     finish();
                 }
-            } else { // patient
+            } else { // Patient menu items
                 if (id == R.id.nav_dashboard) {
                     fragment = new DashboardFragment();
                 } else if (id == R.id.nav_appointments) {
@@ -76,10 +77,11 @@ public class DashboardActivity extends AppCompatActivity {
                 }
             }
 
-            if (fragment != null) loadFragment(fragment);
+            if (fragment != null) {
+                loadFragment(fragment);
+            }
             return true;
         });
-
     }
 
     private void loadFragment(Fragment fragment) {

@@ -40,7 +40,26 @@ public class AppointmentsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         appointmentList = new ArrayList<>();
-        adapter = new AppointmentsAdapter(getContext(), appointmentList);
+
+        // Adapter with callback
+        adapter = new AppointmentsAdapter(getContext(), appointmentList, new AppointmentsAdapter.CheckInCallback() {
+            @Override
+            public void onCheckIn(Appointment appointment) {
+                // Update status in Firebase
+                if (appointment.getId() != null) {
+                    dbRef.child(appointment.getId()).child("status").setValue("Checked In")
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(getContext(), "Checked in successfully", Toast.LENGTH_SHORT).show();
+                                appointment.setStatus("Checked In");
+                                adapter.notifyDataSetChanged();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(getContext(), "Failed to check in", Toast.LENGTH_SHORT).show()
+                            );
+                }
+            }
+        });
+
         recyclerView.setAdapter(adapter);
 
         // Get current user's email

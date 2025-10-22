@@ -1,24 +1,26 @@
 package com.queuemed.models;
 
 public class PatientQueueItem {
+    private String id;
     private String name;
-    private String email;
-    private String checkInStatus; // Pending / Checked-in
+    private String status; // must match what we use in adapter
 
-    public PatientQueueItem() { }
+    // Empty constructor for Firebase
+    public PatientQueueItem() {}
 
-    public PatientQueueItem(String name, String email, String checkInStatus) {
+    public PatientQueueItem(String id, String name, String status) {
+        this.id = id;
         this.name = name;
-        this.email = email;
-        this.checkInStatus = checkInStatus;
+        this.status = status;
     }
+
+    // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getCheckInStatus() { return checkInStatus; }
-    public void setCheckInStatus(String checkInStatus) { this.checkInStatus = checkInStatus; }
+    public String getStatus() { return status; }  // <-- needed for QueueAdapter
+    public void setStatus(String status) { this.status = status; }
 }
