@@ -62,6 +62,8 @@ dependencies {
     // Firestore
     implementation("com.google.firebase:firebase-firestore:25.1.0")
     implementation("com.google.firebase:firebase-auth:23.2.0")
+
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 }
 
 
