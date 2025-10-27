@@ -33,22 +33,15 @@ public class BookAppointmentFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Inflate the fragment layout
         View view = inflater.inflate(R.layout.fragment_book_appointment, container, false);
 
-        // Initialize views
         etDate = view.findViewById(R.id.etDate);
         etTime = view.findViewById(R.id.etTime);
-        btnBook = view.findViewById(R.id.btnBook); // Updated ID
+        btnBook = view.findViewById(R.id.btnBook);
         sp = new SharedPrefManager(requireContext());
 
-        // Date picker
         etDate.setOnClickListener(v -> showDatePicker());
-
-        // Time picker
         etTime.setOnClickListener(v -> showTimePicker());
-
-        // Submit appointment
         btnBook.setOnClickListener(v -> submitAppointment());
 
         return view;
@@ -99,13 +92,25 @@ public class BookAppointmentFragment extends Fragment {
             return;
         }
 
+        if (TextUtils.isEmpty(patientEmail)) {
+            Toast.makeText(getContext(), "Error: Missing user email.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String id = UUID.randomUUID().toString();
         String status = "Pending";
 
+        //  Create a user-specific path using the email
+        String emailKey = patientEmail.replace(".", "_");
+
         Appointment appointment = new Appointment(id, patientName, patientEmail, date, time, status);
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("appointments");
-        dbRef.child(id).setValue(appointment)
+        DatabaseReference dbRef = FirebaseDatabase.getInstance()
+                .getReference("appointments")
+                .child(emailKey)
+                .child(id);
+
+        dbRef.setValue(appointment)
                 .addOnSuccessListener(aVoid ->
                         Toast.makeText(getContext(), "Appointment booked successfully", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e ->

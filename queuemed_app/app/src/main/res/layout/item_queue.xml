@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/bg_card_light"
+    android:layout_marginBottom="8dp"
+    android:elevation="2dp">
+
+    <!-- Queue Position -->
+    <TextView
+        android:id="@+id/tvQueuePosition"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:gravity="center"/>
+
+    <!-- Patient Name -->
+    <TextView
+        android:id="@+id/tvQueueName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Patient Name"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:singleLine="true"/>
+
+    <!-- Status -->
+    <TextView
+        android:id="@+id/tvQueueStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pending"
+        android:textSize="14sp"
+        android:textColor="#757575"
+        android:layout_marginStart="8dp"/>
+</LinearLayout>

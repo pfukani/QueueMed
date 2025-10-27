@@ -1,30 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#121212">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:spacing="12dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Medical History"
             android:textColor="#FFFFFF"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Placeholder for history -->
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/historyContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No history available"
-            android:textColor="#CCCCCC"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="vertical"/>
     </LinearLayout>
 </ScrollView>
