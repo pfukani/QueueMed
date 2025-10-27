@@ -147,6 +147,17 @@
             android:textColor="#B0B0B0"
             android:layout_marginBottom="8dp"/>
 
+        <TextView
+            android:id="@+id/tvQueueCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Queue: 0"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp"/>
+
+
         <!-- RecyclerView for Appointments -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerRecentAppointments"

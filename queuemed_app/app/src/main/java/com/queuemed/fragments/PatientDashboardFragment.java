@@ -1,5 +1,6 @@
 package com.queuemed.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,7 @@ public class PatientDashboardFragment extends Fragment {
     private DatabaseReference appointmentsRef;
     private FirebaseUser currentUser;
 
+    @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,7 +48,7 @@ public class PatientDashboardFragment extends Fragment {
         tvUpcomingAppointments = view.findViewById(R.id.tvUpcomingAppointments);
         tvCheckedIn = view.findViewById(R.id.tvCheckedIn);
         tvNextAppointment = view.findViewById(R.id.tvNextAppointment);
-        recyclerPatientAppointments = view.findViewById(R.id.recyclerPatientAppointments);
+        recyclerPatientAppointments = view.findViewById(R.id.recyclerRecentAppointments);
 
         appointmentList = new ArrayList<>();
         adapter = new AppointmentAdapter(getContext(), appointmentList, null, false);

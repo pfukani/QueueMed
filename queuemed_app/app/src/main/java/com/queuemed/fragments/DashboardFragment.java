@@ -26,104 +26,115 @@ import com.queuemed.models.PatientQueueItem;
 import com.queuemed.utils.SharedPrefManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class DashboardFragment extends Fragment {
 
+    private TextView tvQueueCount, tvAppointmentsCount;
     private RecyclerView recyclerAppointments, recyclerQueue;
     private AppointmentAdapter appointmentAdapter;
     private QueueAdapter queueAdapter;
 
-    private List<Appointment> recentAppointments = new ArrayList<>();
+    private List<Appointment> appointmentList = new ArrayList<>();
     private List<PatientQueueItem> queueList = new ArrayList<>();
 
-    private DatabaseReference appointmentsRef, queueRef;
+    private DatabaseReference dbAppointmentsRef, dbQueueRef;
+    private SharedPrefManager sp;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_patient_dashboard, container, false);
 
-        recyclerAppointments = view.findViewById(R.id.recyclerPatientAppointments);
+        sp = new SharedPrefManager(getContext());
+
+        tvQueueCount = view.findViewById(R.id.tvQueueCount);
+        tvAppointmentsCount = view.findViewById(R.id.tvUpcomingAppointments);
+        recyclerAppointments = view.findViewById(R.id.recyclerRecentAppointments);
         recyclerQueue = view.findViewById(R.id.recyclerQueue);
 
-        // Safety check for null RecyclerViews
-        if (recyclerAppointments != null) {
-            recyclerAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
-            appointmentAdapter = new AppointmentAdapter(getContext(), recentAppointments, null, false);
-            recyclerAppointments.setAdapter(appointmentAdapter);
-        }
+        recyclerAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerQueue.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        if (recyclerQueue != null) {
-            recyclerQueue.setLayoutManager(new LinearLayoutManager(getContext()));
-            queueAdapter = new QueueAdapter(getContext(), queueList, "", patient -> { /* handle click */ });
-            recyclerQueue.setAdapter(queueAdapter);
-        }
+        dbAppointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
+        dbQueueRef = FirebaseDatabase.getInstance().getReference("queue");
 
-        // Firebase references
-        appointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
-        queueRef = FirebaseDatabase.getInstance().getReference("queue");
+        appointmentAdapter = new AppointmentAdapter(getContext(), appointmentList, null, false);
+        recyclerAppointments.setAdapter(appointmentAdapter);
 
-        loadAppointments();
-        loadQueue();
+        queueAdapter = new QueueAdapter(getContext(), queueList, "", null);
+        recyclerQueue.setAdapter(queueAdapter);
+
+        refreshData();
 
         return view;
     }
 
-    private void loadAppointments() {
-        if (appointmentsRef == null) return;
+    private void refreshData() {
+        loadAppointments();
+        loadQueue();
+    }
 
-        appointmentsRef.addValueEventListener(new ValueEventListener() {
+    private void loadAppointments() {
+        final String userEmailKey = sp.getUserEmail() != null ? sp.getUserEmail().replace(".", "_") : "";
+
+        dbAppointmentsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                recentAppointments.clear();
+                appointmentList.clear();
+                int totalAppointments = 0;
 
-                for (DataSnapshot userNode : snapshot.getChildren()) {
-                    for (DataSnapshot apptNode : userNode.getChildren()) {
-                        // Only attempt conversion if snapshot is a Map/object
-                        Object obj = apptNode.getValue();
-                        if (obj instanceof Map) {
-                            Appointment appointment = apptNode.getValue(Appointment.class);
-                            if (appointment != null) recentAppointments.add(appointment);
+                for (DataSnapshot apptNode : snapshot.getChildren()) {
+                    Appointment appointment = apptNode.getValue(Appointment.class);
+                    if (appointment != null) {
+                        String apptEmail = appointment.getPatientEmail();
+                        if (apptEmail != null && apptEmail.replace(".", "_").equals(userEmailKey)) {
+                            appointmentList.add(appointment);
+                            totalAppointments++;
                         }
                     }
                 }
 
-                if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
+                tvAppointmentsCount.setText("Appointments: " + totalAppointments);
+                appointmentAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load appointments", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void loadQueue() {
-        if (queueRef == null) return;
+        final String userEmailKey = sp.getUserEmail() != null ? sp.getUserEmail().replace(".", "_") : "";
 
-        queueRef.addValueEventListener(new ValueEventListener() {
+        dbQueueRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 queueList.clear();
+                int queueCount = 0;
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Object obj = ds.getValue();
-                    if (obj instanceof Map) {
-                        PatientQueueItem item = ds.getValue(PatientQueueItem.class);
-                        if (item != null) queueList.add(item);
+                    PatientQueueItem item = ds.getValue(PatientQueueItem.class);
+                    if (item != null) {
+                        String patientEmail = item.getPatientEmail();
+                        if (patientEmail != null && patientEmail.replace(".", "_").equals(userEmailKey)) {
+                            queueList.add(item);
+                            queueCount++;
+                        }
                     }
                 }
 
-                if (queueAdapter != null) queueAdapter.notifyDataSetChanged();
+                tvQueueCount.setText("Queue: " + queueCount);
+                queueAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load queue", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }
-

@@ -13,102 +13,103 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.queuemed.R;
 import com.queuemed.utils.SharedPrefManager;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 public class VitalsFragment extends Fragment {
 
     private TextView tvBP, tvTemp, tvPulse, tvTimestamp;
+    private DatabaseReference ref;
     private SharedPrefManager sp;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_vitals, container, false);
 
-        sp = new SharedPrefManager(requireContext()); // initialize SharedPrefManager
-
-        tvBP = view.findViewById(R.id.tvBP);
-        tvTemp = view.findViewById(R.id.tvTemp);
+        // Initialize UI
+        tvBP = view.findViewById(R.id.tvBloodPressure);
+        tvTemp = view.findViewById(R.id.tvTemperature);
         tvPulse = view.findViewById(R.id.tvPulse);
-        tvTimestamp = view.findViewById(R.id.tvVitalsTimestamp);
+        tvTimestamp = view.findViewById(R.id.tvTimestamp);
 
-        loadVitals();
+        // Initialize SharedPref
+        sp = new SharedPrefManager(requireContext());
+
+        loadPatientVitals();
 
         return view;
     }
 
-    private void loadVitals() {
-        String emailKey = sp.getUserEmail() != null ? sp.getUserEmail().replace(".", "_") : "";
+    private void loadPatientVitals() {
+        String userEmail = sp.getUserEmail();
+        if (userEmail == null || userEmail.isEmpty()) {
+            Toast.makeText(getContext(), "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        FirebaseDatabase.getInstance().getReference("patient_records")
-                .child(emailKey)
-                .orderByChild("timestamp")
-                .limitToLast(1)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (!snapshot.exists()) return;
+        // Firebase key-safe email
+        String emailKey = userEmail.replace(".", "_");
+        ref = FirebaseDatabase.getInstance().getReference("patient_records").child(emailKey);
 
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            String bp = ds.child("bloodPressure").getValue(String.class);
-                            String temp = ds.child("temperature").getValue(String.class);
-                            String pulse = ds.child("pulse").getValue(String.class);
-                            Long timestamp = ds.child("timestamp").getValue(Long.class);
+        // Retrieve the most recent vitals entry
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    tvBP.setText("--/-- mmHg");
+                    tvTemp.setText("-- °C");
+                    tvPulse.setText("-- bpm");
+                    tvTimestamp.setText("Last Updated: --");
+                    return;
+                }
 
-                            tvBP.setText(bp != null ? bp + " mmHg" : "--/-- mmHg");
-                            tvTemp.setText(temp != null ? temp + " °C" : "-- °C");
-                            tvPulse.setText(pulse != null ? pulse + " bpm" : "-- bpm");
+                DataSnapshot latestRecord = null;
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    latestRecord = ds;
+                }
 
-                            // Color coding based on normal ranges
-                            if (bp != null) {
-                                String[] parts = bp.split("/");
-                                if (parts.length == 2) {
-                                    try {
-                                        int sys = Integer.parseInt(parts[0]);
-                                        int dia = Integer.parseInt(parts[1]);
-                                        if (sys > 140 || dia > 90) tvBP.setTextColor(0xFFFF5555); // high BP -> red
-                                        else tvBP.setTextColor(0xFF00FF00); // normal -> green
-                                    } catch (NumberFormatException ignored) {}
-                                }
-                            }
+                if (latestRecord != null) {
+                    // Try multiple possible key variations (to handle old DB records)
+                    String bp = getValue(latestRecord, "bloodPressure", "bp", "blood_pressure");
+                    String temp = getValue(latestRecord, "temperature", "temp");
+                    String pulse = getValue(latestRecord, "pulse", "heartRate");
+                    Long timestamp = latestRecord.child("timestamp").getValue(Long.class);
 
-                            if (temp != null) {
-                                try {
-                                    float t = Float.parseFloat(temp);
-                                    if (t > 37.5) tvTemp.setTextColor(0xFFFF5555); // fever -> red
-                                    else tvTemp.setTextColor(0xFF00FF00); // normal -> green
-                                } catch (NumberFormatException ignored) {}
-                            }
+                    tvBP.setText(bp != null ? bp + " mmHg" : "--/-- mmHg");
+                    tvTemp.setText(temp != null ? temp + " °C" : "-- °C");
+                    tvPulse.setText(pulse != null ? pulse + " bpm" : "-- bpm");
 
-                            if (pulse != null) {
-                                try {
-                                    int p = Integer.parseInt(pulse);
-                                    if (p < 60 || p > 100) tvPulse.setTextColor(0xFFFF5555); // abnormal -> red
-                                    else tvPulse.setTextColor(0xFF00FF00); // normal -> green
-                                } catch (NumberFormatException ignored) {}
-                            }
-
-                            if (timestamp != null) {
-                                java.text.SimpleDateFormat sdf =
-                                        new java.text.SimpleDateFormat("dd MMM yyyy HH:mm", java.util.Locale.getDefault());
-                                tvTimestamp.setText("Last Updated: " + sdf.format(new java.util.Date(timestamp)));
-                            } else {
-                                tvTimestamp.setText("Last Updated: --");
-                            }
-                        }
+                    if (timestamp != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
+                        tvTimestamp.setText("Last Updated: " + sdf.format(new Date(timestamp)));
+                    } else {
+                        tvTimestamp.setText("Last Updated: --");
                     }
+                }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    private String getValue(DataSnapshot snapshot, String... keys) {
+        for (String key : keys) {
+            if (snapshot.child(key).exists()) {
+                return snapshot.child(key).getValue(String.class);
+            }
+        }
+        return null;
+    }
 }
