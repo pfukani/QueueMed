@@ -27,7 +27,7 @@ public class SharedPrefManager {
         }
     }
 
-    // Save full user info
+    // Save basic user info: name, email, contact
     public void saveUserInfo(String name, String email, String contact) {
         if (name != null) editor.putString(KEY_NAME, name);
         if (email != null) editor.putString(KEY_EMAIL, email);
@@ -35,7 +35,7 @@ public class SharedPrefManager {
         editor.apply();
     }
 
-    // Getters with default values
+    // Getters
     public String getUserRole() {
         return prefs.getString(KEY_ROLE, "patient");
     }

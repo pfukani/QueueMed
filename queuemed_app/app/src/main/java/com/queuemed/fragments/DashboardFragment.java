@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,83 +19,111 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.queuemed.R;
-import com.queuemed.adapters.AppointmentsAdapter;
-import com.queuemed.adapters.AppointmentsAdapter.CheckInCallback;
+import com.queuemed.adapters.AppointmentAdapter;
+import com.queuemed.adapters.QueueAdapter;
 import com.queuemed.models.Appointment;
+import com.queuemed.models.PatientQueueItem;
 import com.queuemed.utils.SharedPrefManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class DashboardFragment extends Fragment {
 
-    private TextView tvWelcome, tvUpcomingAppointments, tvCheckedIn;
-    private RecyclerView recyclerRecentAppointments;
-    private AppointmentsAdapter adapter;
-    private List<Appointment> recentAppointments = new ArrayList<>();
+    private RecyclerView recyclerAppointments, recyclerQueue;
+    private AppointmentAdapter appointmentAdapter;
+    private QueueAdapter queueAdapter;
 
-    private DatabaseReference dbRef;
-    private SharedPrefManager sp;
+    private List<Appointment> recentAppointments = new ArrayList<>();
+    private List<PatientQueueItem> queueList = new ArrayList<>();
+
+    private DatabaseReference appointmentsRef, queueRef;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
+        View view = inflater.inflate(R.layout.fragment_patient_dashboard, container, false);
 
-        tvWelcome = view.findViewById(R.id.tvWelcome);
-        tvUpcomingAppointments = view.findViewById(R.id.tvUpcomingAppointments);
-        tvCheckedIn = view.findViewById(R.id.tvCheckedIn);
-        recyclerRecentAppointments = view.findViewById(R.id.recyclerRecentAppointments);
+        recyclerAppointments = view.findViewById(R.id.recyclerPatientAppointments);
+        recyclerQueue = view.findViewById(R.id.recyclerQueue);
 
-        sp = new SharedPrefManager(getContext());
-        String userName = sp.getUserName();
-        tvWelcome.setText("Welcome, " + userName);
+        // Safety check for null RecyclerViews
+        if (recyclerAppointments != null) {
+            recyclerAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
+            appointmentAdapter = new AppointmentAdapter(getContext(), recentAppointments, null, false);
+            recyclerAppointments.setAdapter(appointmentAdapter);
+        }
 
-        // Updated adapter with CheckInCallback
-        adapter = new AppointmentsAdapter(getContext(), recentAppointments, new CheckInCallback() {
-            @Override
-            public void onCheckIn(Appointment appointment) {
-                // Optional: Handle check-in click if needed on Dashboard
-                // For now, do nothing or show a Toast
-            }
-        });
+        if (recyclerQueue != null) {
+            recyclerQueue.setLayoutManager(new LinearLayoutManager(getContext()));
+            queueAdapter = new QueueAdapter(getContext(), queueList, "", patient -> { /* handle click */ });
+            recyclerQueue.setAdapter(queueAdapter);
+        }
 
-        recyclerRecentAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerRecentAppointments.setAdapter(adapter);
+        // Firebase references
+        appointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
+        queueRef = FirebaseDatabase.getInstance().getReference("queue");
 
         loadAppointments();
+        loadQueue();
 
         return view;
     }
 
     private void loadAppointments() {
-        String userEmailKey = sp.getUserEmail().replace(".", "_");
-        dbRef = FirebaseDatabase.getInstance().getReference("appointments").child(userEmailKey);
+        if (appointmentsRef == null) return;
 
-        dbRef.addValueEventListener(new ValueEventListener() {
+        appointmentsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 recentAppointments.clear();
-                int upcomingCount = 0, checkedInCount = 0;
 
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    Appointment a = ds.getValue(Appointment.class);
-                    if (a != null) {
-                        recentAppointments.add(a);
-                        if ("Pending".equals(a.getStatus())) upcomingCount++;
-                        if ("CheckedIn".equals(a.getStatus())) checkedInCount++;
+                for (DataSnapshot userNode : snapshot.getChildren()) {
+                    for (DataSnapshot apptNode : userNode.getChildren()) {
+                        // Only attempt conversion if snapshot is a Map/object
+                        Object obj = apptNode.getValue();
+                        if (obj instanceof Map) {
+                            Appointment appointment = apptNode.getValue(Appointment.class);
+                            if (appointment != null) recentAppointments.add(appointment);
+                        }
                     }
                 }
 
-                tvUpcomingAppointments.setText(String.valueOf(upcomingCount));
-                tvCheckedIn.setText(String.valueOf(checkedInCount));
-                adapter.notifyDataSetChanged();
+                if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+    }
+
+    private void loadQueue() {
+        if (queueRef == null) return;
+
+        queueRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                queueList.clear();
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Object obj = ds.getValue();
+                    if (obj instanceof Map) {
+                        PatientQueueItem item = ds.getValue(PatientQueueItem.class);
+                        if (item != null) queueList.add(item);
+                    }
+                }
+
+                if (queueAdapter != null) queueAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
 }
+
