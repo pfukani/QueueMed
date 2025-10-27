@@ -35,6 +35,16 @@ public class SharedPrefManager {
         editor.apply();
     }
 
+    public void saveUserProfileImage(String base64) {
+        editor.putString("user_profile_image", base64);
+        editor.apply();
+    }
+
+    public String getUserProfileImage() {
+        return prefs.getString("user_profile_image", "");
+    }
+
+
     // Getters
     public String getUserRole() {
         return prefs.getString(KEY_ROLE, "patient");
