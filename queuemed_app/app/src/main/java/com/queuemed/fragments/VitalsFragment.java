@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,23 +28,35 @@ import java.util.Locale;
 public class VitalsFragment extends Fragment {
 
     private TextView tvBP, tvTemp, tvPulse, tvTimestamp;
-    private DatabaseReference ref;
+    private LinearLayout contentLayout;
+    private ShimmerFrameLayout shimmerLayout;
+
     private SharedPrefManager sp;
+    private DatabaseReference ref;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_vitals, container, false);
 
-        // Initialize UI
+        // Initialize Shared Preferences
+        sp = new SharedPrefManager(requireContext());
+
+        // Bind views
+        contentLayout = view.findViewById(R.id.contentLayout);
+        shimmerLayout = view.findViewById(R.id.shimmerLayout);
+
         tvBP = view.findViewById(R.id.tvBloodPressure);
         tvTemp = view.findViewById(R.id.tvTemperature);
         tvPulse = view.findViewById(R.id.tvPulse);
         tvTimestamp = view.findViewById(R.id.tvTimestamp);
 
-        // Initialize SharedPref
-        sp = new SharedPrefManager(requireContext());
+        // Show shimmer while loading
+        shimmerLayout.startShimmer();
+        shimmerLayout.setVisibility(View.VISIBLE);
+        contentLayout.setVisibility(View.GONE);
 
         loadPatientVitals();
 
@@ -53,55 +67,63 @@ public class VitalsFragment extends Fragment {
         String userEmail = sp.getUserEmail();
         if (userEmail == null || userEmail.isEmpty()) {
             Toast.makeText(getContext(), "No user logged in", Toast.LENGTH_SHORT).show();
+            shimmerLayout.stopShimmer();
+            shimmerLayout.setVisibility(View.GONE);
+            contentLayout.setVisibility(View.VISIBLE);
             return;
         }
 
-        // Firebase key-safe email
         String emailKey = userEmail.replace(".", "_");
         ref = FirebaseDatabase.getInstance().getReference("patient_records").child(emailKey);
 
-        // Retrieve the most recent vitals entry
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) {
-                    tvBP.setText("--/-- mmHg");
-                    tvTemp.setText("-- °C");
-                    tvPulse.setText("-- bpm");
-                    tvTimestamp.setText("Last Updated: --");
-                    return;
-                }
+        ref.orderByChild("timestamp").limitToLast(1)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        shimmerLayout.stopShimmer();
+                        shimmerLayout.setVisibility(View.GONE);
+                        contentLayout.setVisibility(View.VISIBLE);
 
-                DataSnapshot latestRecord = null;
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    latestRecord = ds;
-                }
+                        if (!snapshot.exists()) {
+                            tvBP.setText("--/-- mmHg");
+                            tvTemp.setText("-- °C");
+                            tvPulse.setText("-- bpm");
+                            tvTimestamp.setText("Last Updated: --");
+                            return;
+                        }
 
-                if (latestRecord != null) {
-                    // Try multiple possible key variations (to handle old DB records)
-                    String bp = getValue(latestRecord, "bloodPressure", "bp", "blood_pressure");
-                    String temp = getValue(latestRecord, "temperature", "temp");
-                    String pulse = getValue(latestRecord, "pulse", "heartRate");
-                    Long timestamp = latestRecord.child("timestamp").getValue(Long.class);
+                        DataSnapshot latestRecord = null;
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            latestRecord = ds;
+                        }
 
-                    tvBP.setText(bp != null ? bp + " mmHg" : "--/-- mmHg");
-                    tvTemp.setText(temp != null ? temp + " °C" : "-- °C");
-                    tvPulse.setText(pulse != null ? pulse + " bpm" : "-- bpm");
+                        if (latestRecord != null) {
+                            String bp = getValue(latestRecord, "bloodPressure", "bp", "blood_pressure");
+                            String temp = getValue(latestRecord, "temperature", "temp");
+                            String pulse = getValue(latestRecord, "pulse", "heartRate");
+                            Long timestamp = latestRecord.child("timestamp").getValue(Long.class);
 
-                    if (timestamp != null) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
-                        tvTimestamp.setText("Last Updated: " + sdf.format(new Date(timestamp)));
-                    } else {
-                        tvTimestamp.setText("Last Updated: --");
+                            tvBP.setText(bp != null ? bp + " mmHg" : "--/-- mmHg");
+                            tvTemp.setText(temp != null ? temp + " °C" : "-- °C");
+                            tvPulse.setText(pulse != null ? pulse + " bpm" : "-- bpm");
+
+                            if (timestamp != null) {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
+                                tvTimestamp.setText("Last Updated: " + sdf.format(new Date(timestamp)));
+                            } else {
+                                tvTimestamp.setText("Last Updated: --");
+                            }
+                        }
                     }
-                }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        shimmerLayout.stopShimmer();
+                        shimmerLayout.setVisibility(View.GONE);
+                        contentLayout.setVisibility(View.VISIBLE);
+                        Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private String getValue(DataSnapshot snapshot, String... keys) {
