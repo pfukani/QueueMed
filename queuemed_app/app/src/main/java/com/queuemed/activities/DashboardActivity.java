@@ -13,6 +13,7 @@ import com.queuemed.fragments.MedicalHistoryFragment;
 import com.queuemed.fragments.ProfileFragment;
 import com.queuemed.fragments.QueueFragment;
 import com.queuemed.fragments.StaffDashboardFragment;
+import com.queuemed.fragments.StaffMedicalHistoryFragment;
 import com.queuemed.fragments.VitalsFragment;
 import com.queuemed.fragments.CheckInFragment;
 import com.queuemed.utils.SharedPrefManager;
@@ -36,9 +37,13 @@ public class DashboardActivity extends AppCompatActivity {
         // Inflate the proper menu
         if (role.equals("staff")) {
             bottomNav.inflateMenu(R.menu.bottom_nav_staff);
+            // Set default selected item for staff
+            bottomNav.setSelectedItemId(R.id.nav_queue); // Or whatever should be default
             loadFragment(new StaffDashboardFragment()); // Default for staff
         } else { // patient
             bottomNav.inflateMenu(R.menu.bottom_nav_patient);
+            // Set default selected item for patient
+            bottomNav.setSelectedItemId(R.id.nav_dashboard);
             loadFragment(new DashboardFragment()); // Default for patient
         }
 
@@ -53,13 +58,14 @@ public class DashboardActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_update_vitals) {
                     fragment = new VitalsFragment();
                 } else if (id == R.id.nav_patient_records) {
-                    fragment = new MedicalHistoryFragment();
+                    fragment = new StaffMedicalHistoryFragment();
                 } else if (id == R.id.nav_profile) {
                     fragment = new ProfileFragment();
                 } else if (id == R.id.nav_logout) {
-                    sp.clear();
+                    sp.logoutUser();
                     startActivity(new Intent(DashboardActivity.this, LoginActivity.class));
                     finish();
+                    return true; // Return early since we're finishing the activity
                 }
             } else { // Patient menu items
                 if (id == R.id.nav_dashboard) {
@@ -79,8 +85,9 @@ public class DashboardActivity extends AppCompatActivity {
 
             if (fragment != null) {
                 loadFragment(fragment);
+                return true;
             }
-            return true;
+            return false;
         });
     }
 

@@ -55,7 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
         body.put("first_name", first);
         body.put("last_name", last);
         body.put("email", email);
-        body.put("contact", contact);
+        body.put("contact_no", contact); // CHANGED: "contact" to "contact_no"
         body.put("password", password);
 
         Call<Map<String,Object>> call = api.register(body);
@@ -71,6 +71,8 @@ public class RegisterActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(RegisterActivity.this, "Error: "+response.body().get("message"), Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Response not successful", Toast.LENGTH_SHORT).show();
                 }
             }
 

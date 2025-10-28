@@ -23,4 +23,17 @@ public interface ApiService {
     @POST("getAppointments.php")
     Call<Map<String, Object>> getAppointments(@Body Map<String, String> body);
 
+    @POST("save_medical_history.php")
+    Call<Map<String, Object>> saveMedicalHistory(@Body Map<String, Object> medicalHistory);
+
+    @GET("get_medical_histories.php")
+    Call<Map<String, Object>> getMedicalHistories(@Query("staff_id") int staffId);
+    @GET("get_medical_history.php")
+    Call<Map<String, Object>> getMedicalHistory(@Query("history_id") int historyId);
+
+    @POST("delete_medical_history.php")
+    Call<Map<String, Object>> deleteMedicalHistory(@Body Map<String, Object> requestBody);
+
+    @POST("update_medical_history.php")
+    Call<Map<String, Object>> updateMedicalHistory(@Body Map<String, Object> medicalHistory);
 }

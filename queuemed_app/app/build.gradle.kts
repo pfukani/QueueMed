@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -62,6 +63,20 @@ dependencies {
     // Firestore
     implementation("com.google.firebase:firebase-firestore:25.1.0")
     implementation("com.google.firebase:firebase-auth:23.2.0")
+
+    //For logging in and ApiClient
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    //Volley library
+    implementation("com.android.volley:volley:1.2.1")
+
+    //Profile page colors
+    implementation("com.google.android.material:material:1.6.0")
+
+    //Image save
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }
+
 
 
