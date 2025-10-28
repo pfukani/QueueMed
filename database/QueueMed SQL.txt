@@ -1,0 +1,37 @@
+CREATE DATABASE IF NOT EXISTS queuemed;
+USE queuemed;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  id_number VARCHAR(13),
+  sex VARCHAR(10),
+  age INT,
+  contact_no VARCHAR(15) NOT NULL,
+  race VARCHAR(30),
+  language VARCHAR(30),
+  email VARCHAR(100) NOT NULL UNIQUE,
+  role ENUM('patient', 'staff') DEFAULT 'patient',
+  image_url VARCHAR(255),
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS medical_history (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  patient_details TEXT NOT NULL,
+  diagnosed_conditions TEXT,
+  hereditary_diseases TEXT,
+  allergies TEXT,
+  vaccination_status TEXT,
+  sexual_history TEXT,
+  notes TEXT,
+  created_by INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
