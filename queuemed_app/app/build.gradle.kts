@@ -43,7 +43,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -64,6 +63,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:25.1.0")
     implementation("com.google.firebase:firebase-auth:23.2.0")
 
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
+
     //For logging in and ApiClient
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
@@ -77,6 +78,5 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
 }
-
 
 

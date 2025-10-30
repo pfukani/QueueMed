@@ -5,10 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -16,11 +20,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.queuemed.R;
+import com.queuemed.adapters.AppointmentAdapter;
+import com.queuemed.adapters.QueueAdapter;
+import com.queuemed.models.Appointment;
+import com.queuemed.models.PatientQueueItem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class StaffDashboardFragment extends Fragment {
 
     private TextView tvQueueCount, tvAppointmentsCount;
-    private DatabaseReference dbRef;
+    private RecyclerView recyclerAppointments, recyclerQueue;
+    private AppointmentAdapter appointmentAdapter;
+    private QueueAdapter queueAdapter;
+
+    private List<Appointment> appointmentList = new ArrayList<>();
+    private List<PatientQueueItem> queueList = new ArrayList<>();
+
+    private DatabaseReference dbAppointmentsRef, dbQueueRef;
 
     @Nullable
     @Override
@@ -30,25 +49,149 @@ public class StaffDashboardFragment extends Fragment {
 
         tvQueueCount = view.findViewById(R.id.tvQueueCount);
         tvAppointmentsCount = view.findViewById(R.id.tvAppointmentsCount);
+        recyclerAppointments = view.findViewById(R.id.recyclerStaffAppointments);
+        recyclerQueue = view.findViewById(R.id.recyclerQueueList);
 
-        dbRef = FirebaseDatabase.getInstance().getReference("appointments");
+        recyclerAppointments.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerQueue.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        dbRef.addValueEventListener(new ValueEventListener() {
+        dbAppointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
+        dbQueueRef = FirebaseDatabase.getInstance().getReference("queue");
+
+        // Appointment adapter (staff can check-in)
+        appointmentAdapter = new AppointmentAdapter(getContext(), appointmentList, appointment -> {
+            checkInAppointment(appointment);
+        }, true);
+        recyclerAppointments.setAdapter(appointmentAdapter);
+
+        // Queue adapter (staff can click patient)
+        queueAdapter = new QueueAdapter(getContext(), queueList, "", patient -> openPatientDetails(patient));
+        recyclerQueue.setAdapter(queueAdapter);
+
+        refreshData();
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshData();
+    }
+
+    private void refreshData() {
+        loadAppointments();
+        loadQueue();
+    }
+
+    private void loadAppointments() {
+        dbAppointmentsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int totalAppointments = 0;
-                for(DataSnapshot userNode : snapshot.getChildren()){
-                    totalAppointments += userNode.getChildrenCount();
+                appointmentList.clear();
+
+                for (DataSnapshot userNode : snapshot.getChildren()) {
+                    for (DataSnapshot apptNode : userNode.getChildren()) {
+                        Object obj = apptNode.getValue();
+                        if (obj instanceof Map) {
+                            Appointment appointment = apptNode.getValue(Appointment.class);
+                            if (appointment != null) appointmentList.add(appointment);
+                        }
+                    }
                 }
-                tvAppointmentsCount.setText("Total Appointments: " + totalAppointments);
+
+                if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) { }
         });
+    }
 
-        // TODO: You can also count patients in queue if you have a queue node
 
-        return view;
+    private void loadQueue() {
+        dbQueueRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                queueList.clear();
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Object obj = ds.getValue();
+                    if (obj instanceof Map) {
+                        PatientQueueItem item = ds.getValue(PatientQueueItem.class);
+                        if (item != null) queueList.add(item);
+                    }
+                }
+
+                if (queueAdapter != null) queueAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+    }
+
+
+    private void checkInAppointment(Appointment appointment) {
+        appointment.setStatus("Checked In");
+
+        String today = java.time.LocalDate.now().toString();
+        DatabaseReference dbAppointment = dbAppointmentsRef.child(appointment.getPatientEmail().replace(".", "_")).child(appointment.getId());
+        DatabaseReference dbQueueToday = dbQueueRef.child(today);
+
+        // Create queue item
+        // Generate a unique appointment ID (if you don’t already have one)
+        String appointmentId = java.util.UUID.randomUUID().toString();
+
+// Create a PatientQueueItem with all 5 parameters
+        PatientQueueItem queueItem = new PatientQueueItem(
+                appointmentId,
+                appointment.getPatientName(),
+                appointment.getPatientEmail(),
+                "Waiting",
+                System.currentTimeMillis()
+        );
+
+
+// Push to Firebase queue
+        DatabaseReference queueRef = FirebaseDatabase.getInstance().getReference("queue");
+        String queueId = queueRef.push().getKey();
+
+        if (queueId != null) {
+            queueRef.child(queueId).setValue(queueItem)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Patient added to queue", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Failed to add to queue", Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(getContext(), "Error generating queue ID", Toast.LENGTH_SHORT).show();
+        }
+
+
+
+        dbQueueToday.push().setValue(queueItem).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                dbAppointment.setValue(appointment).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Patient Checked-In: " + appointment.getPatientName(), Toast.LENGTH_SHORT).show();
+                    refreshData();
+                }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to update appointment", Toast.LENGTH_SHORT).show());
+            } else {
+                Toast.makeText(getContext(), "Failed to add to queue", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void openPatientDetails(PatientQueueItem patient) {
+        PatientDetailsFragment fragment = PatientDetailsFragment.newInstance(
+                patient.getPatientName(),
+                patient.getPatientEmail()
+        );
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmentContainer, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

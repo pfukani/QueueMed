@@ -19,7 +19,7 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#B0B0B0"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp"/>
 
         <!-- Quick Stats -->
         <LinearLayout
@@ -27,12 +27,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp"
                 android:background="@drawable/bg_card_dark"
@@ -42,9 +42,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Upcoming"
-                    android:textStyle="bold"
+                    android:text="Total"
                     android:textSize="16sp"
+                    android:textStyle="bold"
                     android:textColor="#B0B0B0" />
 
                 <TextView
@@ -53,15 +53,15 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textSize="20sp"
-                    android:textColor="#D9D9D9"
                     android:textStyle="bold"
+                    android:textColor="#FFFFFF"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp"
                 android:background="@drawable/bg_card_dark"
@@ -71,8 +71,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Checked In"
-                    android:textStyle="bold"
                     android:textSize="16sp"
+                    android:textStyle="bold"
                     android:textColor="#B0B0B0" />
 
                 <TextView
@@ -81,23 +81,73 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textSize="20sp"
-                    android:textColor="#D9D9D9"
                     android:textStyle="bold"
+                    android:textColor="#FFFFFF"
                     android:layout_marginTop="4dp"/>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Recent Appointments Label -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Next Appointment Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recent Appointments"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_card_dark"
+            android:elevation="4dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next Appointment"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#B0B0B0"/>
+
+            <TextView
+                android:id="@+id/tvNextAppointment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No upcoming appointments"
+                android:textSize="18sp"
+                android:textColor="#D9D9D9"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- Current Queue Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Queue"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#B0B0B0"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"/>
 
-        <!-- RecyclerView for Recent Appointments -->
+        <!-- RecyclerView for Queue -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerQueue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:background="#121212"
+            android:elevation="2dp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Upcoming Appointments List Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="All Appointments"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#B0B0B0"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- RecyclerView for Appointments -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerRecentAppointments"
             android:layout_width="match_parent"
@@ -105,5 +155,6 @@
             android:background="#121212"
             android:padding="8dp"
             android:elevation="2dp"/>
+
     </LinearLayout>
 </ScrollView>

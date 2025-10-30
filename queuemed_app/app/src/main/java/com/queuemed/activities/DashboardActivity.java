@@ -52,8 +52,9 @@ public class DashboardActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (role.equals("staff")) {
-                // Staff menu items
-                if (id == R.id.nav_queue) {
+                if (id == R.id.nav_staff_dashboard) {
+                    fragment = new StaffDashboardFragment();
+                } else if (id == R.id.nav_queue) {
                     fragment = new QueueFragment();
                 } else if (id == R.id.nav_update_vitals) {
                     fragment = new VitalsFragment();
@@ -88,6 +89,16 @@ public class DashboardActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+
+        // Refresh dashboard when reselected
+        bottomNav.setOnItemReselectedListener(item -> {
+            int id = item.getItemId();
+            if ("staff".equals(role) && id == R.id.nav_staff_dashboard) {
+                loadFragment(new StaffDashboardFragment());
+            } else if (!"staff".equals(role) && id == R.id.nav_dashboard) {
+                loadFragment(new DashboardFragment());
+            }
         });
     }
 

@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Dashboard/Home for everyone -->
+    <!-- Dashboard/Home for staff -->
     <item
-        android:id="@+id/nav_dashboard"
+        android:id="@+id/nav_staff_dashboard"
         android:icon="@drawable/ic_dashboard"
         android:title="Dashboard" />
 
