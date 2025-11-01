@@ -13,8 +13,9 @@ import com.queuemed.fragments.CheckInFragment;
 import com.queuemed.fragments.DashboardFragment;
 import com.queuemed.fragments.MedicalHistoryFragment;
 import com.queuemed.fragments.ProfileFragment;
-import com.queuemed.fragments.QueueFragment;
+import com.queuemed.fragments.ReportsFragment;
 import com.queuemed.fragments.StaffDashboardFragment;
+import com.queuemed.fragments.StaffMedicalHistoryFragment;
 import com.queuemed.fragments.VitalsFragment;
 import com.queuemed.utils.SharedPrefManager;
 
@@ -50,13 +51,20 @@ public class DashboardActivity extends AppCompatActivity {
             if ("staff".equals(role)) {
                 if (id == R.id.nav_staff_dashboard) {
                     fragment = new StaffDashboardFragment();
-                } else if (id == R.id.nav_queue) {
-                    fragment = new QueueFragment();
-                } else if (id == R.id.nav_update_vitals) {
+                }
+                else if (id == R.id.nav_patient_records) {
+                    fragment = new StaffMedicalHistoryFragment();
+                }
+
+                else if (id == R.id.nav_update_vitals) {
                     fragment = new VitalsFragment();
-                } else if (id == R.id.nav_patient_records) {
-                    fragment = new MedicalHistoryFragment();
-                } else if (id == R.id.nav_profile) {
+                }
+
+                else if (id == R.id.nav_reports) {
+                    fragment = new ReportsFragment();
+                }
+
+                else if (id == R.id.nav_profile) {
                     fragment = new ProfileFragment();
                 } else if (id == R.id.nav_logout) {
                     sp.clear();
