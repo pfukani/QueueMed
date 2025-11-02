@@ -30,6 +30,9 @@ import com.queuemed.models.DailySummary;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +44,7 @@ public class ReportsFragment extends Fragment {
     private DailySummaryAdapter adapter;
     private List<DailySummary> summaryList = new ArrayList<>();
 
-    private DatabaseReference appointmentsRef;
+    private DatabaseReference appointmentsRef, queueRef;
 
     @Nullable
     @Override
@@ -58,48 +61,87 @@ public class ReportsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         appointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
+        queueRef = FirebaseDatabase.getInstance().getReference("queue");
 
         loadDailyReport();
         setupExportButton(view);
-
 
         return view;
     }
 
     private void loadDailyReport() {
-        appointmentsRef.addValueEventListener(new ValueEventListener() {
+        // Step 1: Load appointments
+        appointmentsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Map<String, DailySummary> dailyMap = new HashMap<>();
 
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    Appointment appt = ds.getValue(Appointment.class);
-                    if (appt == null) continue;
+                for (DataSnapshot userNode : snapshot.getChildren()) {
+                    for (DataSnapshot apptNode : userNode.getChildren()) {
+                        Object raw = apptNode.getValue();
+                        if (!(raw instanceof Map)) continue; // defensive check
 
-                    String dateKey = appt.getDate(); // already stored as string
+                        Appointment appt = apptNode.getValue(Appointment.class);
+                        if (appt == null || appt.getDate() == null) continue;
 
-                    DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
-                    summary.incrementAppointments();
+                        String dateKey = appt.getDate();
+                        DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
 
-                    if ("checked_in".equalsIgnoreCase(appt.getStatus())) {
-                        summary.incrementCheckedIn();
+                        summary.incrementAppointments();
+
+                        if ("Checked In".equalsIgnoreCase(appt.getStatus())) {
+                            summary.incrementCheckedIn();
+                        }
+
+                        dailyMap.put(dateKey, summary);
                     }
-                    if ("vitals_taken".equalsIgnoreCase(appt.getStatus())) {
-                        summary.incrementVitalsTaken();
-                    }
-
-                    dailyMap.put(dateKey, summary);
                 }
 
-                summaryList.clear();
-                summaryList.addAll(dailyMap.values());
-                adapter.notifyDataSetChanged();
+                // Step 2: Merge vitals from queue/patient_records
+                queueRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot queueItem : snapshot.getChildren()) {
+                            DataSnapshot recordsNode = queueItem.child("patient_records");
+                            for (DataSnapshot record : recordsNode.getChildren()) {
+                                String status = record.child("status").getValue(String.class);
+                                Long ts = record.child("timestamp").getValue(Long.class);
+
+                                if (status == null || ts == null) continue;
+
+                                LocalDate date = Instant.ofEpochMilli(ts)
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate();
+                                String dateKey = date.toString();
+
+                                DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
+
+                                if ("Ongoing".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)) {
+                                    summary.incrementVitalsTaken();
+                                }
+
+                                dailyMap.put(dateKey, summary);
+                            }
+                        }
+
+                        // Update UI
+                        summaryList.clear();
+                        summaryList.addAll(dailyMap.values());
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
+                        Log.e("ReportsFragment", "Queue error: " + error.getMessage());
+                    }
+                });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Failed to load data", Toast.LENGTH_SHORT).show();
-                Log.e("ReportsFragment", "Firebase error: " + error.getMessage());
+                Toast.makeText(getContext(), "Failed to load appointments", Toast.LENGTH_SHORT).show();
+                Log.e("ReportsFragment", "Appointments error: " + error.getMessage());
             }
         });
     }

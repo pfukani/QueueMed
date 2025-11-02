@@ -25,9 +25,11 @@ import com.queuemed.adapters.QueueAdapter;
 import com.queuemed.models.Appointment;
 import com.queuemed.models.PatientQueueItem;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class StaffDashboardFragment extends Fragment {
 
@@ -83,65 +85,120 @@ public class StaffDashboardFragment extends Fragment {
         loadAppointments();
         loadQueue();
     }
+private void loadAppointments() {
+    ValueEventListener appointmentsListener = null;
+    if (appointmentsListener != null) {
+        dbAppointmentsRef.removeEventListener(appointmentsListener);
+    }
 
-    private void loadAppointments() {
-        dbAppointmentsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                appointmentList.clear();
+    appointmentsListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            appointmentList.clear();
 
-                for (DataSnapshot userNode : snapshot.getChildren()) {
-                    for (DataSnapshot apptNode : userNode.getChildren()) {
-                        Object obj = apptNode.getValue();
-                        if (obj instanceof Map) {
-                            Appointment appointment = apptNode.getValue(Appointment.class);
-                            if (appointment != null) appointmentList.add(appointment);
+            int bookedCount = 0;
+            int checkedInCount = 0;
+            int completedCount = 0;
+
+            for (DataSnapshot userNode : snapshot.getChildren()) {
+                for (DataSnapshot apptNode : userNode.getChildren()) {
+                    Object raw = apptNode.getValue();
+                    if (raw instanceof Map) {
+                        Appointment appointment = apptNode.getValue(Appointment.class);
+                        if (appointment != null) {
+                            appointmentList.add(appointment);
+
+                            // Count by status
+                            String status = appointment.getStatus();
+                            if ("Booked".equalsIgnoreCase(status)) {
+                                bookedCount++;
+                            } else if ("Checked In".equalsIgnoreCase(status)) {
+                                checkedInCount++;
+                            } else if ("Completed".equalsIgnoreCase(status)) {
+                                completedCount++;
+                            }
                         }
                     }
                 }
-
-                if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
-        });
-    }
+            if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
 
+            // 👉 Update the TextView with a breakdown
+            if (tvAppointmentsCount != null) {
+                tvAppointmentsCount.setText(
+                        "Appointments - Booked: " + bookedCount +
+                                " | Checked In: " + checkedInCount +
+                                " | Completed: " + completedCount
+                );
+            }
+        }
 
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) { }
+    };
+
+    dbAppointmentsRef.addValueEventListener(appointmentsListener);
+}
     private void loadQueue() {
-        dbQueueRef.addValueEventListener(new ValueEventListener() {
+        ValueEventListener queueListener = null;
+        if (queueListener != null) {
+            dbQueueRef.removeEventListener(queueListener);
+        }
+
+        queueListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 queueList.clear();
 
+                int waitingCount = 0;
+                int ongoingCount = 0;
+                int completedCount = 0;
+
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Object obj = ds.getValue();
-                    if (obj instanceof Map) {
-                        PatientQueueItem item = ds.getValue(PatientQueueItem.class);
-                        if (item != null) queueList.add(item);
+                    PatientQueueItem item = ds.getValue(PatientQueueItem.class);
+                    if (item != null) {
+                        queueList.add(item);
+
+                        // Count by status
+                        if ("Waiting".equalsIgnoreCase(item.getStatus())) {
+                            waitingCount++;
+                        } else if ("Ongoing".equalsIgnoreCase(item.getStatus())) {
+                            ongoingCount++;
+                        } else if ("Completed".equalsIgnoreCase(item.getStatus())) {
+                            completedCount++;
+                        }
                     }
                 }
 
                 if (queueAdapter != null) queueAdapter.notifyDataSetChanged();
+
+                // 👉 Update the TextView with a breakdown
+                if (tvQueueCount != null) {
+                    tvQueueCount.setText(
+                            "Queue - Waiting: " + waitingCount +
+                                    " | Ongoing: " + ongoingCount +
+                                    " | Completed: " + completedCount
+                    );
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) { }
-        });
+        };
+
+        dbQueueRef.addValueEventListener(queueListener);
     }
-
-
     private void checkInAppointment(Appointment appointment) {
         appointment.setStatus("Checked In");
 
-        String today = java.time.LocalDate.now().toString();
+        String today = LocalDate.now().toString();
         DatabaseReference dbAppointment = dbAppointmentsRef.child(appointment.getPatientEmail().replace(".", "_")).child(appointment.getId());
         DatabaseReference dbQueueToday = dbQueueRef.child(today);
 
         // Create queue item
         // Generate a unique appointment ID (if you don’t already have one)
-        String appointmentId = java.util.UUID.randomUUID().toString();
+        String appointmentId = UUID.randomUUID().toString();
 
 // Create a PatientQueueItem with all 5 parameters
         PatientQueueItem queueItem = new PatientQueueItem(
