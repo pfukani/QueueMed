@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#121212"
     android:padding="16dp">
 
     <LinearLayout
@@ -12,157 +13,282 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- Profile Image -->
-        <ImageView
-            android:id="@+id/profileImage"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/ic_heart"
-            android:layout_marginBottom="24dp"
-            android:contentDescription="Profile Image" />
+        <!-- Gradient Avatar -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            app:cardCornerRadius="70dp"
+            app:cardElevation="8dp"
+            android:layout_marginBottom="16dp"
+            app:strokeColor="#FF4444"
+            app:strokeWidth="2dp"
+            android:background="@drawable/gradient_circle">
+
+            <ImageView
+                android:id="@+id/profileImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_heart"
+                android:contentDescription="Profile Image"/>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Profile Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your Profile"
-            android:textColor="#FF0000"
-            android:textSize="22sp"
+            android:textColor="#FF4444"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp"/>
 
-        <!-- Profile Info Container -->
-        <LinearLayout
+        <!-- Info Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#1E1E1E"
-            android:padding="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            android:backgroundTint="#1E1E1E"
             android:layout_marginBottom="24dp"
-            android:elevation="4dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:clipToPadding="false">
+            android:padding="16dp">
 
-            <!-- User Name -->
-            <TextView
-                android:id="@+id/tvProfileName"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                android:orientation="vertical">
 
-            <!-- User Surname -->
-            <TextView
-                android:id="@+id/tvProfileSurname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Surname: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                <!-- Name -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-            <!-- ID Number -->
-            <TextView
-                android:id="@+id/tvProfileIdNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ID Number: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_name"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Name: John"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
 
-            <!-- Sex -->
-            <TextView
-                android:id="@+id/tvProfileSex"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sex: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                <!-- Surname -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-            <!-- Age -->
-            <TextView
-                android:id="@+id/tvProfileAge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Age: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_profile2"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileSurname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Surname: Doe"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
 
-            <!-- Contact -->
-            <TextView
-                android:id="@+id/tvProfileContact"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Contact: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                <!-- ID Number -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-            <!-- Race -->
-            <TextView
-                android:id="@+id/tvProfileRace"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Race: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_id"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileIdNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ID Number: 1234567890"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
 
-            <!-- Language -->
-            <TextView
-                android:id="@+id/tvProfileLanguage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Language: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                <!-- Age -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-            <!-- Email -->
-            <TextView
-                android:id="@+id/tvProfileEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email: "
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_age"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileAge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Age: 30"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
 
-        </LinearLayout>
+                <!-- Sex -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-        <!-- Edit Profile Button -->
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_gender"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileSex"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sex: Male"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+                <!-- Contact -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_phone"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileContact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Contact: +27 123 456 789"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+                <!-- Race -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_people"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileRace"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Race: African"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+                <!-- Language -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_language"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileLanguage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Language: English"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+                <!-- Email -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_email"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#FF4444"/>
+                    <TextView
+                        android:id="@+id/tvProfileEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email: john@example.com"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Buttons -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#FF0000"
-            android:elevation="4dp"
+            android:layout_marginBottom="12dp"
             android:text="Edit Profile"
-            android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:backgroundTint="#FF4444"
             app:cornerRadius="16dp"
-            android:layout_marginBottom="16dp" />
+            android:elevation="4dp"
+            android:textAllCaps="false"/>
 
-        <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#FF4444"
-            android:elevation="4dp"
             android:text="Logout"
-            android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:cornerRadius="16dp" />
-
+            android:backgroundTint="#FF8888"
+            app:cornerRadius="16dp"
+            android:elevation="4dp"
+            android:textAllCaps="false"/>
     </LinearLayout>
 </ScrollView>
