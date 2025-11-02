@@ -5,42 +5,35 @@ public class Appointment {
     private String doctorName;
     private String patientName;
     private String patientEmail;
-    private String date;
-    private String time;
-    private String status;
+    private String date;   // e.g. "2025-11-01"
+    private String time;   // e.g. "14:30"
+    private String status; // "booked", "checked_in", "vitals_taken"
 
-    // Required empty constructor for Firebase
-    public Appointment() {}
+    public Appointment() {} // Required for Firebase
 
-    //  Constructor WITH doctorName
-    public Appointment(String id, String doctorName, String patientName, String patientEmail, String date, String time, String status) {
+    public Appointment(String id, String doctorName, String patientName,
+                       String patientEmail, String date, String time, String status) {
         this.id = id;
-        this.doctorName = doctorName;
-        this.patientName = patientName;
-        this.patientEmail = patientEmail;
-        this.date = date;
-        this.time = time;
-        this.status = status;
+        this.doctorName = doctorName != null ? doctorName : "";
+        this.patientName = patientName != null ? patientName : "";
+        this.patientEmail = patientEmail != null ? patientEmail : "";
+        this.date = date != null ? date : "";
+        this.time = time != null ? time : "";
+        this.status = status != null ? status : "booked";
     }
 
-    //  New constructor WITHOUT doctorName (for BookAppointmentActivity)
-    public Appointment(String id, String patientName, String patientEmail, String date, String time, String status) {
-        this.id = id;
-        this.patientName = patientName;
-        this.patientEmail = patientEmail;
-        this.date = date;
-        this.time = time;
-        this.status = status;
-        this.doctorName = ""; // default empty string
+    public Appointment(String id, String patientName, String patientEmail,
+                       String date, String time, String status) {
+        this(id, "", patientName, patientEmail, date, time, status);
     }
 
-    public String getId() { return id; }
-    public String getDoctorName() { return doctorName; }
-    public String getPatientName() { return patientName; }
-    public String getPatientEmail() { return patientEmail; }
-    public String getDate() { return date; }
-    public String getTime() { return time; }
-    public String getStatus() { return status; }
+    public String getId() { return id != null ? id : ""; }
+    public String getDoctorName() { return doctorName != null ? doctorName : ""; }
+    public String getPatientName() { return patientName != null ? patientName : "Unknown"; }
+    public String getPatientEmail() { return patientEmail != null ? patientEmail : ""; }
+    public String getDate() { return date != null ? date : ""; }
+    public String getTime() { return time != null ? time : ""; }
+    public String getStatus() { return status != null ? status : "booked"; }
 
     public void setId(String id) { this.id = id; }
     public void setDoctorName(String doctorName) { this.doctorName = doctorName; }

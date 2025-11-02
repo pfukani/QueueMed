@@ -21,12 +21,12 @@ if(empty($email) || empty($password)){
     exit;
 }
 
-// Find user
-$stmt = $conn->prepare("SELECT id, first_name, email, contact, password, role FROM users WHERE email = ?");
+// Find user - SELECT ALL FIELDS
+$stmt = $conn->prepare("SELECT id, first_name, last_name, id_number, sex, age, contact_no, race, language, email, role, image_url, password_hash FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $stmt->store_result();
-$stmt->bind_result($id, $first_name, $emailDB, $contact, $hashedPassword, $role);
+$stmt->bind_result($id, $first_name, $last_name, $id_number, $sex, $age, $contact, $race, $language, $emailDB, $role, $image_url, $hashedPassword);
 
 if($stmt->num_rows == 0){
     echo json_encode(["success"=>false, "message"=>"User not found"]);
@@ -37,14 +37,23 @@ $stmt->fetch();
 
 // Verify password
 if(password_verify($password, $hashedPassword)){
+    // Return ALL user data
     echo json_encode([
         "success" => true,
         "message" => "Login successful",
         "data" => [
+            "id" => $id,
             "first_name" => $first_name,
+            "last_name" => $last_name,
+            "id_number" => $id_number,
+            "sex" => $sex,
+            "age" => $age,
+            "contact_no" => $contact,
+            "race" => $race,
+            "language" => $language,
             "email" => $emailDB,
-            "contact" => $contact,
-            "role" => $role
+            "role" => $role,
+            "image_url" => $image_url
         ]
     ]);
 } else {

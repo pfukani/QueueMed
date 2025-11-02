@@ -24,7 +24,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 $first = trim($data['first_name'] ?? '');
 $last = trim($data['last_name'] ?? '');
 $email = trim($data['email'] ?? '');
-$contact = trim($data['contact'] ?? '');
+$contact = trim($data['contact_no'] ?? '');
 $password = trim($data['password'] ?? '');
 
 // Validate required fields
@@ -53,7 +53,7 @@ $stmt->close();
 $hashed = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert user
-$stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, contact, password) VALUES (?, ?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, contact_no, password_hash) VALUES (?, ?, ?, ?, ?)");
 if(!$stmt){
     die(json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]));
 }

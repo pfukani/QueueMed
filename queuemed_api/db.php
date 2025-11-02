@@ -5,9 +5,13 @@ $db = "queuemed";
 $user = "root";
 $pass = "";
 
-$conn = new mysqli($host, $user, $pass, $db);
+// Include port in the host parameter
+$conn = new mysqli($host . ":" . $port, $user, $pass, $db);
+
+// Or use this alternative syntax:
+// $conn = new mysqli($host, $user, $pass, $db, $port);
 
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Database connection failed"]));
+    die(json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]));
 }
 ?>
