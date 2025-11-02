@@ -17,7 +17,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import com.queuemed.R;
 import com.queuemed.utils.SharedPrefManager;
 
@@ -70,40 +69,49 @@ public class MedicalHistoryFragment extends Fragment {
                             String notes = visit.child("notes").getValue(String.class);
                             String status = visit.child("status").getValue(String.class);
 
-                            // Card
+                            // Card container
                             CardView card = new CardView(requireContext());
                             card.setCardElevation(6);
                             card.setRadius(12);
                             card.setUseCompatPadding(true);
                             card.setContentPadding(20, 20, 20, 20);
-                            card.setCardBackgroundColor(0xFF1E1E1E);
+                            card.setCardBackgroundColor(0xFF2C2C2C); // lighter gray background
 
                             LinearLayout layout = new LinearLayout(requireContext());
                             layout.setOrientation(LinearLayout.VERTICAL);
+                            layout.setPadding(16, 16, 16, 16); // better spacing
 
+                            // Date
                             TextView tvDate = new TextView(requireContext());
                             tvDate.setText("📅 " + (timestamp != null ? sdf.format(new Date(timestamp)) : "Unknown Date"));
-                            tvDate.setTextColor(0xFFFFFFFF);
+                            tvDate.setTextColor(0xFFFFFFFF); // white
                             tvDate.setTextSize(16);
                             tvDate.setPadding(0, 0, 0, 8);
 
+                            // Vitals
                             TextView tvVitals = new TextView(requireContext());
                             tvVitals.setText(
                                     "BP: " + (bp != null ? bp + " mmHg" : "--/--") + "\n" +
                                             "Temp: " + (temp != null ? temp + "°C" : "--") + "\n" +
                                             "Pulse: " + (pulse != null ? pulse + " bpm" : "--")
                             );
-                            tvVitals.setTextColor(0xFFAAAAAA);
+                            tvVitals.setTextColor(0xFFDDDDDD); // bright gray
                             tvVitals.setPadding(0, 0, 0, 8);
 
+                            // Notes
                             TextView tvNotes = new TextView(requireContext());
                             tvNotes.setText("Notes: " + (notes != null ? notes : "-"));
-                            tvNotes.setTextColor(0xFFBBBBBB);
+                            tvNotes.setTextColor(0xFFCCCCCC); // brighter
                             tvNotes.setPadding(0, 0, 0, 8);
 
+                            // Status
                             TextView tvStatus = new TextView(requireContext());
                             tvStatus.setText("Status: " + (status != null ? status : "N/A"));
-                            tvStatus.setTextColor(status != null && status.equalsIgnoreCase("Completed") ? 0xFF00FF00 : 0xFFFF5555);
+                            tvStatus.setTextColor(
+                                    status != null && status.equalsIgnoreCase("Completed")
+                                            ? 0xFF00FF00 // green
+                                            : 0xFFFF5555 // red
+                            );
 
                             layout.addView(tvDate);
                             layout.addView(tvVitals);

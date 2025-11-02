@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Custom dark alert dialog style -->
+    <style name="DarkDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">#000000</item>      <!-- Black background -->
+        <item name="android:textColor">#FFFDD0</item>       <!-- Cream text -->
+    </style>
+
+</resources>

@@ -151,7 +151,6 @@ public class PatientDetailsFragment extends Fragment {
                 }
 
                 StringBuilder historyText = new StringBuilder();
-
                 SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
 
                 for (DataSnapshot visit : snapshot.getChildren()) {
@@ -174,18 +173,32 @@ public class PatientDetailsFragment extends Fragment {
                             .append("\n\n");
                 }
 
+                // Create a scrollable layout
                 ScrollView scrollView = new ScrollView(getContext());
+                scrollView.setBackgroundColor(0xFF000000); // black background
+
                 TextView textView = new TextView(getContext());
                 textView.setText(historyText.toString());
                 textView.setPadding(40, 30, 40, 30);
-                textView.setTextColor(0xFFEEEEEE);
+                textView.setTextColor(0xFFFFFDD0); // cream text
+                textView.setTextSize(16);
                 scrollView.addView(textView);
 
-                new AlertDialog.Builder(getContext())
+                // Build the dialog with dark theme
+                AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.DarkDialogTheme)
                         .setTitle("Patient History")
                         .setView(scrollView)
-                        .setPositiveButton("Close", null)
-                        .show();
+                        .setPositiveButton("CLOSE", null)
+                        .create();
+
+                dialog.show();
+
+                // Customize title and button text color
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.black);
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFFFFDD0);
+                int titleId = getResources().getIdentifier("alertTitle", "id", "android");
+                TextView titleView = dialog.findViewById(titleId);
+                if (titleView != null) titleView.setTextColor(0xFFFFFDD0);
             }
 
             @Override
