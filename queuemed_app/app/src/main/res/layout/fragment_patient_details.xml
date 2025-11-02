@@ -64,7 +64,7 @@
             android:id="@+id/etNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Additional Notes"
+            android:hint="Additional Notes - Prescription"
             android:minLines="3"
             android:gravity="top"
             android:textColor="#FFFFFF"
