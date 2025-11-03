@@ -55,8 +55,7 @@ public class DashboardActivity extends AppCompatActivity {
             if (role.equals("staff")) {
                 if (id == R.id.nav_staff_dashboard) {
                     fragment = new StaffDashboardFragment();
-                } else if (id == R.id.nav_update_vitals) {
-                    fragment = new VitalsFragment();
+
                 } else if (id == R.id.nav_patient_records) {
                     fragment = new StaffMedicalHistoryFragment();
                 } else if (id == R.id.nav_reports) {
