@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class MedicalHistoryFragment extends Fragment {
+public class PatientHistoryFragment extends Fragment {
 
     private LinearLayout historyContainer;
     private DatabaseReference dbRecordsRef;
@@ -34,7 +34,7 @@ public class MedicalHistoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_medical_history, container, false);
+        View view = inflater.inflate(R.layout.fragment_patient_history, container, false);
 
         historyContainer = view.findViewById(R.id.historyContainer);
         sp = new SharedPrefManager(requireContext());

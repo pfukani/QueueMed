@@ -9,9 +9,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.queuemed.R;
 import com.queuemed.fragments.BookAppointmentFragment;
 import com.queuemed.fragments.DashboardFragment;
-import com.queuemed.fragments.MedicalHistoryFragment;
+import com.queuemed.fragments.PatientHistoryFragment;
 import com.queuemed.fragments.ProfileFragment;
-import com.queuemed.fragments.QueueFragment;
 import com.queuemed.fragments.ReportsFragment;
 import com.queuemed.fragments.StaffDashboardFragment;
 import com.queuemed.fragments.StaffMedicalHistoryFragment;
@@ -78,7 +77,7 @@ public class DashboardActivity extends AppCompatActivity {
                 } else if (id == R.id.nav_vitals) {
                     fragment = new VitalsFragment();
                 } else if (id == R.id.nav_history) {
-                    fragment = new MedicalHistoryFragment();
+                    fragment = new PatientHistoryFragment();
                 } else if (id == R.id.nav_profile) {
                     fragment = new ProfileFragment();
                 }
