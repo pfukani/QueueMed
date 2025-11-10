@@ -60,15 +60,8 @@ public class StaffDashboardFragment extends Fragment {
         dbAppointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
         dbQueueRef = FirebaseDatabase.getInstance().getReference("queue");
 
-        // Appointment adapter (staff can check-in)
-        appointmentAdapter = new AppointmentAdapter(getContext(), appointmentList, appointment -> {
-            checkInAppointment(appointment);
-        }, true);
-        recyclerAppointments.setAdapter(appointmentAdapter);
-
-        // Queue adapter (staff can click patient)
-        queueAdapter = new QueueAdapter(getContext(), queueList, "", patient -> openPatientDetails(patient));
-        recyclerQueue.setAdapter(queueAdapter);
+        // FIX: Use the correct adapter setup for staff
+        setupAdapters();
 
         refreshData();
 
@@ -85,68 +78,84 @@ public class StaffDashboardFragment extends Fragment {
         loadAppointments();
         loadQueue();
     }
-private void loadAppointments() {
-    ValueEventListener appointmentsListener = null;
-    if (appointmentsListener != null) {
-        dbAppointmentsRef.removeEventListener(appointmentsListener);
-    }
+    private void loadAppointments() {
+        ValueEventListener appointmentsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                appointmentList.clear();
 
-    appointmentsListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            appointmentList.clear();
+                int bookedCount = 0;
+                int checkedInCount = 0;
+                int completedCount = 0;
 
-            int bookedCount = 0;
-            int checkedInCount = 0;
-            int completedCount = 0;
+                for (DataSnapshot userNode : snapshot.getChildren()) {
+                    for (DataSnapshot apptNode : userNode.getChildren()) {
+                        Object raw = apptNode.getValue();
+                        if (raw instanceof Map) {
+                            Appointment appointment = apptNode.getValue(Appointment.class);
+                            if (appointment != null) {
+                                // FIX: Don't modify the original appointment object for display
+                                Appointment displayAppointment = new Appointment(
+                                        appointment.getId(),
+                                        "See Doctor", // Always show "See Doctor" for staff
+                                        appointment.getPatientName(),
+                                        appointment.getPatientEmail(),
+                                        appointment.getDate(),
+                                        appointment.getTime(),
+                                        appointment.getStatus()
+                                );
+                                appointmentList.add(displayAppointment);
 
-            for (DataSnapshot userNode : snapshot.getChildren()) {
-                for (DataSnapshot apptNode : userNode.getChildren()) {
-                    Object raw = apptNode.getValue();
-                    if (raw instanceof Map) {
-                        Appointment appointment = apptNode.getValue(Appointment.class);
-                        if (appointment != null) {
-                            appointmentList.add(appointment);
-
-                            // Count by status
-                            String status = appointment.getStatus();
-                            if ("Booked".equalsIgnoreCase(status)) {
-                                bookedCount++;
-                            } else if ("Checked In".equalsIgnoreCase(status)) {
-                                checkedInCount++;
-                            } else if ("Completed".equalsIgnoreCase(status)) {
-                                completedCount++;
+                                // Count by status - include both "Booked" and "Pending"
+                                String status = appointment.getStatus();
+                                if ("Booked".equalsIgnoreCase(status) || "Pending".equalsIgnoreCase(status)) {
+                                    bookedCount++;
+                                } else if ("Checked In".equalsIgnoreCase(status)) {
+                                    checkedInCount++;
+                                } else if ("Completed".equalsIgnoreCase(status)) {
+                                    completedCount++;
+                                }
                             }
                         }
                     }
                 }
+
+                if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
+
+                if (tvAppointmentsCount != null) {
+                    tvAppointmentsCount.setText(
+                            "Appointments - Booked: " + bookedCount +
+                                    " | Checked In: " + checkedInCount +
+                                    " | Completed: " + completedCount
+                    );
+                }
             }
 
-            if (appointmentAdapter != null) appointmentAdapter.notifyDataSetChanged();
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
+        };
 
-            // 👉 Update the TextView with a breakdown
-            if (tvAppointmentsCount != null) {
-                tvAppointmentsCount.setText(
-                        "Appointments - Booked: " + bookedCount +
-                                " | Checked In: " + checkedInCount +
-                                " | Completed: " + completedCount
-                );
-            }
-        }
+        dbAppointmentsRef.addValueEventListener(appointmentsListener);
+    }
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) { }
-    };
+    private void setupAdapters() {
+        // Appointment adapter for staff
+        appointmentAdapter = new AppointmentAdapter(
+                getContext(),
+                appointmentList,
+                null,           // No check-in callback for staff
+                false           // Don't show check-in button
+        );
+        appointmentAdapter.setStaffView(true); // Mark this as staff view
+        recyclerAppointments.setAdapter(appointmentAdapter);
 
-    dbAppointmentsRef.addValueEventListener(appointmentsListener);
-}
+        // Queue adapter remains the same
+        queueAdapter = new QueueAdapter(getContext(), queueList, "", patient -> openPatientDetails(patient));
+        recyclerQueue.setAdapter(queueAdapter);
+    }
+
     private void loadQueue() {
-        ValueEventListener queueListener = null;
-        if (queueListener != null) {
-            dbQueueRef.removeEventListener(queueListener);
-        }
-
-        queueListener = new ValueEventListener() {
+        ValueEventListener queueListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 queueList.clear();
@@ -173,7 +182,7 @@ private void loadAppointments() {
 
                 if (queueAdapter != null) queueAdapter.notifyDataSetChanged();
 
-                // 👉 Update the TextView with a breakdown
+                // Update the TextView with a breakdown
                 if (tvQueueCount != null) {
                     tvQueueCount.setText(
                             "Queue - Waiting: " + waitingCount +

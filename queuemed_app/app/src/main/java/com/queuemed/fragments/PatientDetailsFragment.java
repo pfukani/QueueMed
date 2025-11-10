@@ -3,6 +3,7 @@ package com.queuemed.fragments;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.queuemed.R;
+import com.queuemed.models.Appointment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -112,31 +114,115 @@ public class PatientDetailsFragment extends Fragment {
         vitalsData.put("notes", notes);
         vitalsData.put("timestamp", System.currentTimeMillis());
         vitalsData.put("status", "Ongoing");
+        vitalsData.put("patientName", patientName); // Add patient name for reporting
 
         dbRecordsRef.child(emailKey).child(visitId).setValue(vitalsData)
-                .addOnSuccessListener(aVoid ->
-                        Toast.makeText(getContext(), "Vitals saved successfully", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "Vitals saved successfully", Toast.LENGTH_SHORT).show();
+
+                    // Update reports count - increment vitals taken
+                    updateVitalsTakenCount();
+                })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Failed to save vitals", Toast.LENGTH_SHORT).show());
     }
 
+    private void updateVitalsTakenCount() {
+        String today = java.time.LocalDate.now().toString();
+        DatabaseReference reportsRef = FirebaseDatabase.getInstance().getReference("daily_reports").child(today);
+
+        reportsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int currentVitals;
+                if (snapshot.exists() && snapshot.child("vitalsTaken").getValue() != null) {
+                    currentVitals = snapshot.child("vitalsTaken").getValue(Integer.class);
+                } else {
+                    currentVitals = 0;
+                }
+                // Ensure we're setting an integer value
+                reportsRef.child("vitalsTaken").setValue(currentVitals + 1)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d("VitalsCount", "Vitals count updated to: " + (currentVitals + 1));
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("VitalsCount", "Failed to update vitals count: " + e.getMessage());
+                        });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("VitalsCount", "Failed to read vitals count: " + error.getMessage());
+            }
+        });
+    }
+
     private void markVisitCompleted() {
         String emailKey = patientEmail.replace(".", "_");
-        String today = java.time.LocalDate.now().toString();
 
-        dbRecordsRef.child(emailKey).push().child("status").setValue("Completed");
+        // Update queue status to "Completed"
+        dbQueueRef.orderByChild("patientEmail").equalTo(patientEmail)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            ds.getRef().child("status").setValue("Completed");
+                        }
 
-        dbQueueRef.child(today).get().addOnSuccessListener(snapshot -> {
-            for (DataSnapshot ds : snapshot.getChildren()) {
-                if (ds.child("patientEmail").getValue(String.class).equals(patientEmail)) {
-                    ds.getRef().removeValue();
-                    break;
+                        // Update appointment status to "Completed"
+                        updateAppointmentStatus();
+
+                        // Update patient records status from "Ongoing" to "Completed"
+                        updatePatientRecordsStatus(emailKey);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Failed to update queue", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateAppointmentStatus() {
+        DatabaseReference appointmentsRef = FirebaseDatabase.getInstance().getReference("appointments");
+        String emailKey = patientEmail.replace(".", "_");
+
+        appointmentsRef.child(emailKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot appointmentSnap : snapshot.getChildren()) {
+                    Appointment appointment = appointmentSnap.getValue(Appointment.class);
+                    if (appointment != null && "Checked In".equalsIgnoreCase(appointment.getStatus())) {
+                        appointmentSnap.getRef().child("status").setValue("Completed");
+                    }
                 }
             }
-            Toast.makeText(getContext(), "Visit marked as completed", Toast.LENGTH_SHORT).show();
-            requireActivity().onBackPressed();
-        }).addOnFailureListener(e ->
-                Toast.makeText(getContext(), "Failed to update queue", Toast.LENGTH_SHORT).show());
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to update appointment status", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void updatePatientRecordsStatus(String emailKey) {
+        dbRecordsRef.child(emailKey)
+                .orderByChild("status").equalTo("Ongoing")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot record : snapshot.getChildren()) {
+                            record.getRef().child("status").setValue("Completed");
+                        }
+
+                        Toast.makeText(getContext(), "Visit marked as completed", Toast.LENGTH_SHORT).show();
+                        requireActivity().onBackPressed();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Failed to update records", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void showHistory() {

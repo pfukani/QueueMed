@@ -79,7 +79,7 @@ public class ReportsFragment extends Fragment {
                 for (DataSnapshot userNode : snapshot.getChildren()) {
                     for (DataSnapshot apptNode : userNode.getChildren()) {
                         Object raw = apptNode.getValue();
-                        if (!(raw instanceof Map)) continue; // defensive check
+                        if (!(raw instanceof Map)) continue;
 
                         Appointment appt = apptNode.getValue(Appointment.class);
                         if (appt == null || appt.getDate() == null) continue;
@@ -97,51 +97,87 @@ public class ReportsFragment extends Fragment {
                     }
                 }
 
-                // Step 2: Merge vitals from queue/patient_records
-                queueRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot queueItem : snapshot.getChildren()) {
-                            DataSnapshot recordsNode = queueItem.child("patient_records");
-                            for (DataSnapshot record : recordsNode.getChildren()) {
-                                String status = record.child("status").getValue(String.class);
-                                Long ts = record.child("timestamp").getValue(Long.class);
-
-                                if (status == null || ts == null) continue;
-
-                                LocalDate date = Instant.ofEpochMilli(ts)
-                                        .atZone(ZoneId.systemDefault())
-                                        .toLocalDate();
-                                String dateKey = date.toString();
-
-                                DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
-
-                                if ("Ongoing".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)) {
-                                    summary.incrementVitalsTaken();
-                                }
-
-                                dailyMap.put(dateKey, summary);
-                            }
-                        }
-
-                        // Update UI
-                        summaryList.clear();
-                        summaryList.addAll(dailyMap.values());
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
-                        Log.e("ReportsFragment", "Queue error: " + error.getMessage());
-                    }
-                });
+                // Step 2: Load vitals from patient_records (NEW IMPROVED METHOD)
+                loadVitalsForReports(dailyMap);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(getContext(), "Failed to load appointments", Toast.LENGTH_SHORT).show();
-                Log.e("ReportsFragment", "Appointments error: " + error.getMessage());
+            }
+        });
+    }
+
+    private void loadVitalsForReports(Map<String, DailySummary> dailyMap) {
+        DatabaseReference recordsRef = FirebaseDatabase.getInstance().getReference("patient_records");
+        DatabaseReference dailyReportsRef = FirebaseDatabase.getInstance().getReference("daily_reports");
+
+        // First, check if we have data in daily_reports
+        dailyReportsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Use data from daily_reports which is updated when vitals are saved
+                    for (DataSnapshot dateSnap : snapshot.getChildren()) {
+                        String dateKey = dateSnap.getKey();
+                        Integer vitalsTaken = dateSnap.child("vitalsTaken").getValue(Integer.class);
+
+                        if (dateKey != null && vitalsTaken != null) {
+                            DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
+                            summary.setVitalsTaken(vitalsTaken);
+                            dailyMap.put(dateKey, summary);
+                        }
+                    }
+
+                    // Update UI
+                    summaryList.clear();
+                    summaryList.addAll(dailyMap.values());
+                    adapter.notifyDataSetChanged();
+                } else {
+                    // Fallback: Count from patient_records
+                    countVitalsFromRecords(dailyMap);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                countVitalsFromRecords(dailyMap);
+            }
+        });
+    }
+
+    private void countVitalsFromRecords(Map<String, DailySummary> dailyMap) {
+        DatabaseReference recordsRef = FirebaseDatabase.getInstance().getReference("patient_records");
+
+        recordsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot patientNode : snapshot.getChildren()) {
+                    for (DataSnapshot record : patientNode.getChildren()) {
+                        Long timestamp = record.child("timestamp").getValue(Long.class);
+                        // Count ALL vitals records, not just "Ongoing"
+                        if (timestamp != null) {
+                            LocalDate date = Instant.ofEpochMilli(timestamp)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate();
+                            String dateKey = date.toString();
+
+                            DailySummary summary = dailyMap.getOrDefault(dateKey, new DailySummary(dateKey));
+                            summary.incrementVitalsTaken();
+                            dailyMap.put(dateKey, summary);
+                        }
+                    }
+                }
+
+                // Update UI
+                summaryList.clear();
+                summaryList.addAll(dailyMap.values());
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load vitals", Toast.LENGTH_SHORT).show();
             }
         });
     }

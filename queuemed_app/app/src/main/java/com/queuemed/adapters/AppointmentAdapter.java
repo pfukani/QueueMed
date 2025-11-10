@@ -26,6 +26,7 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     private List<Appointment> appointmentList;
     private CheckInCallback checkInCallback;
     private boolean showCheckInButton;
+    private boolean isStaffView = false; // Default to patient view
 
     public AppointmentAdapter(Context context, List<Appointment> appointmentList,
                               CheckInCallback checkInCallback, boolean showCheckInButton) {
@@ -46,12 +47,25 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Appointment appointment = appointmentList.get(position);
 
-        holder.tvDoctorName.setText("Doctor: " + appointment.getDoctorName());
+        // For staff view, show "See Doctor" instead of actual doctor name
+        String doctorText = appointment.getDoctorName();
+        if (isStaffView && !appointment.getDoctorName().isEmpty()) {
+            doctorText = "See Doctor:";
+        }
+
+        holder.tvDoctorName.setText(doctorText);
         holder.tvDate.setText("Date: " + appointment.getDate());
         holder.tvTime.setText("Time: " + appointment.getTime());
         holder.tvStatus.setText("Status: " + appointment.getStatus());
 
-        if (showCheckInButton && checkInCallback != null) {
+        // For staff, NEVER show check-in button
+        // For patients, only show if conditions are met
+        boolean shouldShowCheckIn = showCheckInButton &&
+                checkInCallback != null &&
+                !isStaffView &&
+                "Pending".equalsIgnoreCase(appointment.getStatus());
+
+        if (shouldShowCheckIn) {
             holder.btnCheckIn.setVisibility(View.VISIBLE);
             holder.btnCheckIn.setOnClickListener(v -> checkInCallback.onCheckIn(appointment));
         } else {
@@ -62,6 +76,12 @@ public class AppointmentAdapter extends RecyclerView.Adapter<AppointmentAdapter.
     @Override
     public int getItemCount() {
         return appointmentList.size();
+    }
+
+    // Simple method to set staff view
+    public void setStaffView(boolean isStaffView) {
+        this.isStaffView = isStaffView;
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
